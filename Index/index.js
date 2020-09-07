@@ -88,20 +88,6 @@ server.delete('/api/users/:id', (req, res) => {
     }
     
 })
-// server.put('/api/users/:id', (req, res) => {
-//     const id = req.params.id
-//     const changes = req.body;
-//     let found = users.filter(user => user.id === id);
-
-//     if(found){
-//         Object.assign(found, changes);
-//         res.status(200).json(found)
-//     } else {
-//         res.status(404).json({ message: "User not found"});
-//     }
-    
-//     res.json(found);
-// })
 
 server.put('/api/users/:id', (req, res) => {
     id = req.params.id
