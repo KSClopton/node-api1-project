@@ -19,43 +19,88 @@ let users = [
 
 // handle requests to the root of the api, the / route
 server.get('/', (req, res) => {
+
     res.send('Hello from Express');
 })
 
 server.post('/api/users', (req, res) => {
-    const newUser = req.body; // needs express.json middleware
-
-    newUser.id = shortid.generate();
-    users.push(newUser);
-    res.json(newUser);
+    const newUser = req.body; 
+    users.add(newUser)
+    .then(user => {
+  
+    if(newUser !== req.body.json({name: "", bio: ""})){
+        res.status(400).json({errorMessage: "Please provide name and bio for the user."})
+    }else {
+        newUser.id = shortid.generate();
+        users.push(newUser);
+         
+    }})
+    .catch(error => {
+        console.log(error);
+        res.status(500).json({
+            errorMessage: "There was an error while saving the user to the database" 
+        });
+    })
+    .then(
+        res.status(201).json(newUser)
+    )
+    .catch(
+        res.status(500).json({
+            errorMessage: "The users information could not be retrieved."
+        }));
+    
 })
 server.get('/api/users', (req, res) => {
-    res.json(users);
-})
+    users.find(req.query)
+    .then(users => {
+        res.status(200).json(users);
+    })
+    .catch(error => {
+        res.status(500).json({
+            errorMessage: "The users information could not be retrieved."
+        });
+    });
+});
+
 server.get('/api/users/:id', (req, res) => {
-    res.json(users)
+    id = req.params.id
+    users.find(id)
+    .then(user => {
+        if (user) {
+            res.status(200).json(user);
+        }else{
+            res.status(404).json({errorMessage: 'User not found'})
+        }
+    })
+    .catch(error => {
+        res.status(500).json({errorMessage: "The information could not be retrieved"})
+    })
 })
 server.delete('/api/users/:id', (req, res) => {
     const id = req.params.id
     const deleted = users.find(user => user.id === id);
-    
-    users.filter(user => user.id !== id);
-    res.json(deleted);
+    let found = users.filter(user => user.id === id)
+    if(found){
+       users.filter(user => user.id !== id); 
+       res.status(204).json(found);
+    }else{
+        res.status(404).json({message: "User not found"})
+    }
     
 })
 server.put('/api/users/:id', (req, res) => {
     const id = req.params.id
     const changes = req.body;
-    const index = users.findIndex(user => user.id === id);
+    let found = users.filter(user => user.id === id);
 
-    if(index !== -1){
-
+    if(found){
+        Object.assign(found, changes);
+        res.status(200).json(found)
     } else {
         res.status(404).json({ message: "User not found"});
     }
     
-    users.filter(user => user.id !== id);
-    res.json(deleted);
+    res.json(found);
 })
 
 const PORT = 5000; 
